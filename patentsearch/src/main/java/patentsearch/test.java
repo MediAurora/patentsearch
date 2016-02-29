@@ -7,13 +7,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.Format.Field;
 import java.util.Properties;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Observer;
 
 import org.apache.lucene.document.Document;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDResources;
+import org.apache.pdfbox.pdmodel.graphics.xobject.PDXObjectImage;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.pdfbox.searchengine.lucene.*;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.document.Document;
+import org.apache.pdfbox.PDFToImage;
+
 
 /**
  * @author divyaprakash
@@ -88,6 +100,60 @@ public class test {
 		doc.close();
 		*/
 	}
+	
+	public void getPDFImage()
+				throws Exception {
+
+		try {
+			String sourceDir = "C:/DP/patents/9183764.pdf";
+		    String destinationDir = "C:/DP/patents/";
+		    File oldFile = new File(sourceDir);
+		    if (oldFile.exists()){
+		    	PDDocument document = PDDocument.load(sourceDir);
+		        List<PDPage> list =   document.getDocumentCatalog().getAllPages();
+		        String fileName = oldFile.getName().replace(".pdf", "_cover");
+		        int totalImages = 1;
+		        for (PDPage page : list) {
+		        	PDResources pdResources = page.getResources();
+		            Map pageImages = pdResources.getXObjects();
+		            if (pageImages != null){
+		            	Iterator imageIter = pageImages.keySet().iterator();
+		                while (imageIter.hasNext()){
+		                	String key = (String) imageIter.next();
+		                    Object obj = pageImages.get(key);
+
+		                    if(obj instanceof PDXObjectImage) {
+		                    	PDXObjectImage pdxObjectImage = (PDXObjectImage) obj;
+		                    	pdxObjectImage.write2file(destinationDir + fileName+ "_" + totalImages);
+		                    	totalImages++;
+		                    }
+		                }
+		            }
+		        }
+		    }  else {
+		    	System.err.println("File not exist");
+		    }  
+		}
+		catch (Exception e){
+		    System.err.println(e.getMessage());
+		}
+	}
+	
+	//Tesseract call using Tess4J
+	
+	public void callTess4J() {
+        File imageFile = new File("eurotext.tif");
+        ITesseract instance = new Tesseract();  // JNA Interface Mapping
+        // ITesseract instance = new Tesseract1(); // JNA Direct Mapping
+
+        try {
+            String result = instance.doOCR(imageFile);
+            System.out.println(result);
+        } catch (TesseractException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+	
 	/**
 	 * @param args
 	 */
@@ -95,7 +161,12 @@ public class test {
 		// TODO Auto-generated method stub
 		
 		test t = new test();
-		t.pdfParser();
+		try {
+			t.getPDFImage();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
