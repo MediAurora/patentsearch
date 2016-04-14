@@ -13,6 +13,15 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
 public class TikaPDFExtractor {
+	
+    // TikaPDFExtractor Constructor 
+    public TikaPDFExtractor() {
+    
+    }
+    
+    public void TikaPDFParser (String pdfFile, String txtFile) {
+    	
+    }
 
    public static void main(final String[] args) throws IOException,TikaException {
 

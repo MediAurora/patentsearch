@@ -26,7 +26,7 @@ public class GooglePatentScrapper {
 		
 		try {
 			 
-			// need http protocol
+			// need http protocolk
 			//doc = Jsoup.connect("http://circ.ahajournals.org/content/131/4/e29.full.pdf+html").userAgent("Mozilla").ignoreHttpErrors(true).timeout(0).get();
 			doc = Jsoup.connect(url).userAgent("Mozilla")
 					.ignoreHttpErrors(true).timeout(5000).get();

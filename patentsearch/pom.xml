@@ -53,19 +53,19 @@
 <dependency>
   <groupId>com.itextpdf</groupId>
   <artifactId>itext-pdfa</artifactId>
-  <version>5.5.8</version>
+  <version>5.5.9</version>
 </dependency>
 
 <dependency>
   <groupId>com.itextpdf</groupId>
   <artifactId>itext-xtra</artifactId>
-  <version>5.5.8</version>
+  <version>5.5.9</version>
 </dependency>
 
 <dependency>
   <groupId>com.itextpdf.tool</groupId>
   <artifactId>xmlworker</artifactId>
-  <version>5.5.8</version>
+  <version>5.5.9</version>
 </dependency>
 
 <dependency>
@@ -109,6 +109,64 @@
 		<artifactId>tess4j</artifactId>
 		<version>3.0.0</version>
 	</dependency>
+	<dependency>
+		<groupId>com.sun.jna</groupId>
+		<artifactId>jna</artifactId>
+		<version>3.0.9</version>
+	</dependency>
+	<dependency>
+		<groupId>commons-io</groupId>
+		<artifactId>commons-io</artifactId>
+		<version>2.4</version>
+	</dependency>
+	<dependency>
+		<groupId>net.sourceforge.lept4j</groupId>
+		<artifactId>lept4j</artifactId>
+		<version>1.1.1</version>
+	</dependency>
+	<dependency>
+		<groupId>org.ghost4j</groupId>
+		<artifactId>ghost4j</artifactId>
+		<version>1.0.0</version>
+	</dependency>
+	<dependency>
+		<groupId>com.sun.jersey</groupId>
+		<artifactId>jersey-core</artifactId>
+		<version>1.19</version>
+	</dependency>
+	<dependency>
+		<groupId>com.sun.jersey</groupId>
+		<artifactId>jersey-json</artifactId>
+		<version>1.19</version>
+	</dependency>
+	<dependency>
+		<groupId>com.sun.jersey</groupId>
+		<artifactId>jersey-client</artifactId>
+		<version>1.19</version>
+	</dependency>
+	
+	<dependency>
+		<groupId>org.glassfish.jersey.core</groupId>
+		<artifactId>jersey-client</artifactId>
+		<version>2.22.2</version>
+	</dependency>
+	<dependency>
+    	<groupId>javax.ws.rs</groupId>
+    	<artifactId>javax.ws.rs-api</artifactId>
+    	<version>2.0.1</version>
+    	<scope>provided</scope>
+	</dependency>
+    <dependency>
+	    <groupId>org.apache.lucene</groupId>
+		<artifactId>lucene-core</artifactId>
+		<version>5.5.0</version>
+	</dependency>
+	<dependency>
+		<groupId>lucene</groupId>
+		<artifactId>lucene</artifactId>
+		<version>1.4.3</version>
+	</dependency>
+
 
   </dependencies>
 </project>

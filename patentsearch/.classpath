@@ -28,11 +28,32 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="tika-app-1.12.jar"/>
+	<classpathentry kind="lib" path="jai_core-1.1.3.jar"/>
+	<classpathentry kind="lib" path="jai_imageio-1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Softwares/Tesseract-ocr/Tess4J-3.0-src/Tess4J/lib"/>
+	<classpathentry kind="lib" path="tessdata"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7">
 		<attributes>
-			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="tika-app-1.12.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Category-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Combined-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Concept-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-ConstraintQuery-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Entity-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-FeedLinks-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Image-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Keyword-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Language-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Microformats-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Parameter-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Relations-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Sentiment-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-Taxonomy-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI-TextExtract-Test.jar"/>
+	<classpathentry kind="lib" path="dist/AlchemyAPI.jar"/>
+	<classpathentry kind="lib" path="dist/tess4j-3.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
