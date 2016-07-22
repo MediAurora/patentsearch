@@ -133,7 +133,6 @@ public class MYSQLConnector {
 		        try {
 		            conn.close();
 		        } catch (SQLException sqlEx) { } // ignore
-
 		        conn = null;
 		    }
 		}

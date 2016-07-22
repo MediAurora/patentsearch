@@ -166,8 +166,8 @@ public class PDFExtractController {
     				conn.close();
     		    } catch (SQLException sqlEx) { } // ignore
     		        conn = null;
-    		    }
     		}
+    	}
 
     	// process is successful !
 		return 0;    	
