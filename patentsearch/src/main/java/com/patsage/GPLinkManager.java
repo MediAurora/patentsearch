@@ -1,4 +1,4 @@
-package patentsearch;
+package com.patsage;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -19,9 +19,22 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
+
+import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.WebResponseData;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.util.WebConnectionWrapper;
 
  
-public class GoogleSearchParser {
+public class GPLinkManager {
 	
 	/*
 	 * method to generate hashkey for google link
@@ -43,17 +56,19 @@ public class GoogleSearchParser {
 	} 
 	
 	/*
-	 *  The method collects patent links from Google Advance Patent Search (if sourceID = 1)
-	 *  or Google Search (if SourceID = 
-	 *  based on search key words configured in patentsearch.googlepatentresult
+	 *  The method collects patent links from Google Patent Search
+	 *  based on search key words configured in patentsearch.gp_searchkeyword
+	 *  result = 0; error
+	 *  result = 1; success
 	 */
-	public int getGoogleSearchResults(ArrayList key) {
-		System.out.println("<================== inside getGoogleSearchResults()==========================>");
+	public int getGPSearchResults() {
+		System.out.println("<================== inside getGPSearchResults()==========================>");
 		Document doc;
-
+		GPSearchManager searchMgr = new GPSearchManager();
+		ArrayList<Object> key = searchMgr.getSearchCriteria();
 		if(key == null | key.isEmpty()) {
 			System.err.println("----- search keywords map is null or empty----");
-			return 1;
+			return 0;
 		}
 		int size = key.size();
 		//instantiate MySQL connection
@@ -63,108 +78,63 @@ public class GoogleSearchParser {
     	
 		try {
 			for(int i=0; i < size; i++) {
-				HashMap<String, Object> tempMap = (HashMap)key.get(i);
-				String userid = (String) tempMap.get("userid");
-				String keyword = (String) tempMap.get("keyword");
-				Integer sourceId = (Integer) tempMap.get("source");
-				int item = (Integer)tempMap.get("linknum");
-				String url = null;
-
-	   			String sql = "INSERT INTO patentsearch.googlepatentresult " + 
-							"(keyword, title, body, link, linkhash)" +
-							"VALUES (?, ?, ?, ?, ?)";
+				HashMap<String, Object> hash = (HashMap)key.get(i);
+				int searchid = (int) hash.get("searchid");
+				String url = (String) hash.get("url");
+	   			String sql = "INSERT INTO patentsearch.gp_searchresult " + 
+							"(criteria_id, search_url, result_link, linkhash)" +
+							"VALUES (?, ?, ?, ?)";
 
 	   			// create the mysql insert prepared statement
 	   			preparedStmt = conn.prepareStatement(sql);
-
-				if(sourceId == 1) {
-					//Google search
-					url = "https://www.google.com/search?tbo=p&tbm=pts&hl=en&q="+ keyword + "&num=" + item ;
-				
-				} else if(sourceId == 0) {
-					// Google Patent Search
-					url = "https://patents.google.com/?q="+ keyword + "&num=" + item ;
-				}
 		 		System.out.println("url : " + url);
+		 		if (url == null) {
+		 			System.err.println("Search url is null....");
+		 			return 0;
+		 		}
 		 		URL myUrl = new URL(url); 
 		 		// need http protocol
 				doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0")
 										.ignoreHttpErrors(true).timeout(5000).get();
 		 		//doc = Jsoup.parse(myUrl, 5000);
-				
+		 		//doc = getGPSearchResultPage(url);
+		 		if(doc == null) {
+		 			System.err.println("Document is null....");
+		 			return 0;
+		 		}
 		 		// get page title
 				String pageTitle = doc.title();
 				System.out.println("page title : " + pageTitle);
-				
-				System.out.println("SourceId : "+ sourceId + "\n");
-				if(sourceId == 1) {
-					// get all links
-					Elements links = doc.select("div[class=g]");
-					//Elements links = doc.select("a[href]");
-					if(links != null)
-						System.out.println("Element size : " + links.size());			        
+
+				//Elements searchResultItems = doc.select("section[class=style-scope search-results]");
+				//Elements searchResultItems = doc.select("a[href]");
+				Elements searchResultItems = doc.getElementsByTag("a");
+
+				System.out.println("Element  : " + searchResultItems);
+				if(searchResultItems != null) {
+					System.out.println("Element size : " + searchResultItems.size() + " : " + searchResultItems.text());
 					
-					for (Element link : links) {
-		
-			        	Elements hrefLink = link.select("a[href]");
-			        	String href = null;
-			        	if(hrefLink != null)
-			        		href = hrefLink.get(0).attr("href");
-			        	
-			        	Elements titles = link.select("h3[class=r]");
-			            String title = titles.text();
-			
-			            Elements bodies = link.select("span[class=st]");
-			            String body = bodies.text();
-			
-			            System.out.println("Title: "+ title + "\n");
-			            System.out.println("link : "+ href + "\n");
-			            System.out.println("Body: "+body + "\n");
-			            preparedStmt.setString (1, keyword);
-			            preparedStmt.setString (2, title);
-			            preparedStmt.setString (3, body);
-			            preparedStmt.setString (4, href);
-			            String linkhash = makeSHA1Hash(href);
-			            System.out.println("url : " + linkhash);
-			            preparedStmt.setString (5, linkhash);
-			            
-			    		// execute the preparedstatement
-			    		preparedStmt.execute();
-			        }
-				} else if(sourceId == 0) {
-					Elements searchResultItems = doc.select("section[class=style-scope search-results]");
-					//Element resultContainer = doc.getElementById("leftBar");
-					
-					System.out.println("Element  : " + searchResultItems);
-					if(searchResultItems != null) {
-						//System.out.println("Element size : " + resultContainer.text());
-						System.out.println("Element size : " + searchResultItems.size() + " : " + searchResultItems.text());
-						/*
-						for(Element searchItem : searchResultItems) {
-				        	String href = null;
-				        	if(searchItem != null) {
-				        		href = searchItem.data();	
-				        		System.out.println("href : " + href);
-				        		//System.out.println("href : " +searchItem.getElementsByAttribute("href"));
-					            //System.out.println("Title: "+ title + "\n");
-					            //System.out.println("link : "+ href + "\n");
-					            //System.out.println("Body: "+body + "\n");
-					            //preparedStmt.setString (1, keyword);
-					            //preparedStmt.setString (2, title);
-					            //preparedStmt.setString (3, body);
-					            //preparedStmt.setString (4, href);
-					            //String linkhash = makeSHA1Hash(href);
-					            //System.out.println("url : " + linkhash);
-					            //preparedStmt.setString (5, linkhash);					
-					    		
-								// execute the prepared statement
-					    		//preparedStmt.execute();
-							}
-						}*/
+					for(Element searchItem : searchResultItems) {
+				       	String href = null;
+				       	if(searchItem != null) {
+				       		String hrefLink = searchItem.attr("href");
+				       		System.out.println("link : " + hrefLink);
+				       		//System.out.println("Body: "+body + "\n");
+				       		//preparedStmt.setString (1, keyword);
+				       		//preparedStmt.setString (2, title);
+				       		//preparedStmt.setString (3, body);
+				       		//preparedStmt.setString (4, href);
+				       		//String linkhash = makeSHA1Hash(href);
+				       		//System.out.println("url : " + linkhash);
+				       		//preparedStmt.setString (5, linkhash);					
+					   		
+				       		// execute the prepared statement
+				       		//preparedStmt.execute();
+						}
 					}
 				}
 			}
-		} catch (IOException | SQLException | NoSuchAlgorithmException ex) {
+		} catch (IOException | SQLException ex) {
 			ex.printStackTrace();
     	    // handle any errors
     	    System.err.println("SQLException: " + ex.getMessage());
@@ -189,7 +159,7 @@ public class GoogleSearchParser {
 	}	
 	
 	/*
-	 * Method to fetch serarch criteria for a user.
+	 * Method to fetch search criteria for a user.
 	 */
 	public ArrayList<Map<String, Object>> getSearchCriteria(String userid) {
 		
@@ -211,7 +181,7 @@ public class GoogleSearchParser {
 	    		   	"Select userid, keyword, linknum, source from patentsearch.searchkeyword where userid = '"
 	    		   	+ userid + "' and active = 0";
 
-    		// create the mysql insert preparedstatement
+    		// create the mysql insert prepared statement
     		stmt = conn.createStatement();
     		rs = stmt.executeQuery(sql);
     		while (rs.next()) {
@@ -257,17 +227,11 @@ public class GoogleSearchParser {
 		return keyList;
 	}
 	
-	public void masterMethod (String userid) {
-		ArrayList<Map<String, Object>> keyList = new ArrayList<Map<String, Object>>();
-		GoogleSearchParser scrapper = new GoogleSearchParser();
-		keyList = scrapper.getSearchCriteria(userid) ;
-		scrapper.getGoogleSearchResults(keyList);
-	}
 	
 	/*
 	 * method to search Google Patent site using PatentNumber
 	 * the method creates links for google patent site using patent number and
-	 * store it backinto googlepatentresult table
+	 * store it back into googlepatentresult table
 	 */
 	public void prepareGooglePatentLinkUsingPatentNo(String user) {
 		System.out.println("<================== inside prepareGooglePatentLinkUsingPatentNo()==========================>");
@@ -330,19 +294,86 @@ public class GoogleSearchParser {
     	}
 	}
 	
+	/*
+	 * use this mthod to open Google Patent in firefox browser and store the page source 
+	 * as DOM to parse further using JSoup.
+	 */
+	public org.w3c.dom.Document getGPSearchResultPage(String url) {
+		/*
+		// Selenium
+		System.setProperty("webdriver.chrome.driver", "C:/Softwares/Chrome Driver/chromedriver.exe");
+		WebDriver driver = new ChromeDriver();
+
+		driver.get("http://www.google.com");
+		//driver.get(url);  
+		String html_content = driver.getPageSource();
+		driver.close();
+
+		// Jsoup makes DOM here by parsing HTML content
+		Document doc = Jsoup.parse(html_content);
+		*/
+        HtmlPage page = null;
+		final WebClient webClient = new WebClient();
+
+		try {
+			webClient.setWebConnection(
+			        new WebConnectionWrapper(webClient) {
+			            public WebResponse getResponse(WebRequest request) throws IOException {
+			                WebResponse response = super.getResponse(request);
+			                String content = response.getContentAsString("UTF-8");
+			                if(content != null) {
+			                    if(!content.contains("<body>") && content.contains("</head>")) {
+			                        content = content.replace("</head>", "</head>\n<body>");
+			                        if(!content.contains("</body>") && content.contains("</html>")) {
+			                            content = content.replace("</html>", "</body>\n</html>");
+			                        }
+			                    }
+			                }
+			                System.out.println("response: {}" +  content);
+			                WebResponseData data = new WebResponseData(content.getBytes("UTF-8"),
+			                        response.getStatusCode(), response.getStatusMessage(), response.getResponseHeaders());
+			                response = new WebResponse(data, request, response.getLoadTime());
+			                return response;
+			            }
+			        });
+			page = webClient.getPage(url);
+			
+		} catch (FailingHttpStatusCodeException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+        org.w3c.dom.Document doc = page.getOwnerDocument();
+        System.out.println("html page source code =====>\n" + doc);
+
+        webClient.close();
+		
+
+		// OPERATIONS USING DOM TREE
+		return doc;
+	}
+	
 	public static void main(String[] args) {
 	 
 		//String keys = "3D+Bioprinting";
 		//String pageitem = "10";
 		String userid = "divyap";
 		ArrayList<Map<String, Object>> keyList = new ArrayList<Map<String, Object>>();
-		GoogleSearchParser scrapper = new GoogleSearchParser();
-		keyList = scrapper.getSearchCriteria(userid) ;
-		scrapper.getGoogleSearchResults(keyList);
-		
+		GPLinkManager linkMgr = new GPLinkManager();
+
 		//load patentlink in googlepatentresult
 		//scrapper.prepareGooglePatentLinkUsingPatentNo("divyap");
-	 
+
+		//run keyword search on Google Patent and store result links.
+		linkMgr.getGPSearchResults();
+		/*
+		ClassLoader classLoader = GPLinkManager.class.getClassLoader();
+		URL resource = classLoader.getResource("org.apache.http.impl.client.HttpClientBuilder.dnsResolver");
+		System.out.println(resource);
+		
+		String url = "https://patents.google.com/?q=&q=Catheter,ablation&q=injectible&before=filing:2012-01-01&assignee=Boston&num=10";
+		org.w3c.dom.Document doc = linkMgr.getGPSearchResultPage(url);
+		*/
 	  }
  
 }
