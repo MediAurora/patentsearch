@@ -154,6 +154,12 @@ public class GooglePatentParser {
 						}
 					}
 				}
+				
+				//remove spaces from Patent Numbmer
+				if(patNumber !=null) {
+					patNumber = patNumber.trim().replaceAll("\\s", "");
+				}
+				
 				Elements classItems = item.getElementsContainingText("International Classification");
 				//Elements classItems = item.getElementsByClass("patent-data-table-td");
 				if(classItems != null && classItems.size() > 0) {
@@ -276,7 +282,7 @@ public class GooglePatentParser {
 	        preparedStmtPat.setString (9, filingDate);
 	        preparedStmtPat.setString (10, assignee);
 	        preparedStmtPat.setString (11, keyword);
-	        preparedStmtPat.setString (12, "GooglePatent");
+	        preparedStmtPat.setString (12, "GoogleSearch");
 	        preparedStmtPat.setString (13, us_classificationStr);
 	        preparedStmtPat.setString (14, int_classificationStr);
 	        preparedStmtPat.setString (15, coop_classificationStr);

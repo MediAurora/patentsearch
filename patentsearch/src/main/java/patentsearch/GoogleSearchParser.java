@@ -332,8 +332,6 @@ public class GoogleSearchParser {
 	
 	public static void main(String[] args) {
 	 
-		//String keys = "3D+Bioprinting";
-		//String pageitem = "10";
 		String userid = "divyap";
 		ArrayList<Map<String, Object>> keyList = new ArrayList<Map<String, Object>>();
 		GoogleSearchParser scrapper = new GoogleSearchParser();
